@@ -26,11 +26,41 @@ class CoupaScorigami {
                 throw new Error('Could not load achievements data');
             }
             const data = await response.json();
-            this.achievements = data.achievements || [];
+            this.achievements = this.processDuplicateScores(data.achievements || []);
         } catch (error) {
             console.warn('No achievements data found, starting with empty grid');
             this.achievements = [];
         }
+    }
+
+    processDuplicateScores(achievements) {
+        // Create a map to track the earliest achievement for each score
+        const scoreMap = new Map();
+        
+        achievements.forEach(achievement => {
+            const score = achievement.score;
+            const existingAchievement = scoreMap.get(score);
+            
+            if (!existingAchievement) {
+                // First time seeing this score
+                scoreMap.set(score, achievement);
+            } else {
+                // Compare dates to keep the earliest one
+                const currentDate = new Date(achievement.date);
+                const existingDate = new Date(existingAchievement.date);
+                
+                if (currentDate < existingDate) {
+                    // Current achievement is earlier, replace the existing one
+                    scoreMap.set(score, achievement);
+                    console.log(`Duplicate score ${score}: Keeping earlier date ${achievement.date} (${achievement.username}) over ${existingAchievement.date} (${existingAchievement.username})`);
+                } else {
+                    console.log(`Duplicate score ${score}: Keeping earlier date ${existingAchievement.date} (${existingAchievement.username}) over ${achievement.date} (${achievement.username})`);
+                }
+            }
+        });
+        
+        // Convert map back to array
+        return Array.from(scoreMap.values());
     }
 
     createGrid() {

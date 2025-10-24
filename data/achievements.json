@@ -1,28 +1,76 @@
 {
-  "achievements": [
-    {
-      "score": 64,
-      "date": "2025-10-24",
-      "username": "Ezra Tanzer",
-      "image": "images/tanzer.jpeg"
-    },
-    {
-      "score": 43,
-      "date": "2025-10-21",
-      "username": "James Bowes",
-      "image": "images/bowes.jpeg"
-    },
-    {
-      "score": 47,
-      "date": "2025-10-15",
-      "username": "James Bowes",
-      "image": "images/bowes.jpeg"
-    },
-    {
-      "score": 98,
-      "date": "2025-06-11",
-      "username": "James Bowes",
-      "image": "images/bowes.jpeg"
-    }
-  ]
+    "achievements": [
+        {
+            "score": 43,
+            "date": "2025-10-21",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 47,
+            "date": "2025-10-15",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 48,
+            "date": "2025-08-19",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 64,
+            "date": "2025-10-24",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 73,
+            "date": "2025-09-09",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 78,
+            "date": "2025-06-06",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 80,
+            "date": "2025-09-12",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 81,
+            "date": "2025-03-05",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 85,
+            "date": "2025-10-16",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 88,
+            "date": "2025-08-08",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 98,
+            "date": "2025-06-11",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 99,
+            "date": "2025-02-07",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        }
+    ]
 }
