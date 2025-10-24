@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupa Scorigami - Expense Report Score Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧾 Coupa Scorigami</h1>
+        </header>
+
+        <div class="grid-container">
+            <div id="score-grid" class="score-grid">
+                <!-- Grid will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <span class="stat-number" id="achieved-count">0</span>
+                <span class="stat-label">Scores Achieved</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="remaining-count">100</span>
+                <span class="stat-label">Scores Remaining</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="completion-percentage">0%</span>
+                <span class="stat-label">Completion</span>
+            </div>
+        </div>
+
+        <!-- Tooltip for hover information -->
+        <div id="tooltip" class="tooltip">
+            <div class="tooltip-content">
+                <img id="tooltip-image" src="" alt="User photo" class="tooltip-image">
+                <div class="tooltip-info">
+                    <div id="tooltip-name" class="tooltip-name"></div>
+                    <div id="tooltip-date" class="tooltip-date"></div>
+                    <div id="tooltip-score" class="tooltip-score"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Inspired by <a href="https://nflscorigami.com/" target="_blank">NFL Scorigami</a> by Jon Bois</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

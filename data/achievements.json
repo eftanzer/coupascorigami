@@ -1,0 +1,28 @@
+{
+  "achievements": [
+    {
+      "score": 64,
+      "date": "2025-10-24",
+      "username": "Ezra Tanzer",
+      "image": "images/tanzer.jpeg"
+    },
+    {
+      "score": 43,
+      "date": "2025-10-21",
+      "username": "James Bowes",
+      "image": "images/bowes.jpeg"
+    },
+    {
+      "score": 47,
+      "date": "2025-10-15",
+      "username": "James Bowes",
+      "image": "images/bowes.jpeg"
+    },
+    {
+      "score": 98,
+      "date": "2025-06-11",
+      "username": "James Bowes",
+      "image": "images/bowes.jpeg"
+    }
+  ]
+}
