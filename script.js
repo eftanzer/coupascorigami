@@ -45,9 +45,9 @@ class CoupaScorigami {
                 // First time seeing this score
                 scoreMap.set(score, achievement);
             } else {
-                // Compare dates to keep the earliest one
-                const currentDate = new Date(achievement.date);
-                const existingDate = new Date(existingAchievement.date);
+                // Compare dates to keep the earliest one (using local date parsing)
+                const currentDate = this.parseLocalDate(achievement.date);
+                const existingDate = this.parseLocalDate(existingAchievement.date);
                 
                 if (currentDate < existingDate) {
                     // Current achievement is earlier, replace the existing one
@@ -213,9 +213,15 @@ class CoupaScorigami {
         });
     }
 
+    parseLocalDate(dateString) {
+        // Parse date as local date to avoid timezone issues
+        const [year, month, day] = dateString.split('-');
+        return new Date(year, month - 1, day); // month is 0-indexed
+    }
+
     formatDate(dateString) {
         try {
-            const date = new Date(dateString);
+            const date = this.parseLocalDate(dateString);
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
