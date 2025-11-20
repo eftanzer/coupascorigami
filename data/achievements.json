@@ -85,6 +85,12 @@
             "image": "images/tanzer.jpeg"
         },
         {
+            "score": 79,
+            "date": "2025-04-30",
+            "username": "Andrew MacKenzie",
+            "image": "images/mackenzie.jpeg"
+        },
+        {
             "score": 80,
             "date": "2025-09-12",
             "username": "Ezra Tanzer",
@@ -95,6 +101,12 @@
             "date": "2025-03-05",
             "username": "Ezra Tanzer",
             "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 82,
+            "date": "2025-01-31",
+            "username": "Andrew MacKenzie",
+            "image": "images/mackenzie.jpeg"
         },
         {
             "score": 85,
