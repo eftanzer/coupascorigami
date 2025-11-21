@@ -8,6 +8,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- Video Icon (shown after video completes) -->
+        <div id="video-icon" class="video-icon" style="display: none;">
+            <img src="images/tanzer.jpeg" alt="Replay video" class="video-icon-image">
+        </div>
+        
         <header>
             <h1>🧾 Coupa Scorigami</h1>
         </header>
@@ -43,6 +48,18 @@
                     <div id="tooltip-score" class="tooltip-score"></div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Video Modal Overlay -->
+    <div id="video-modal" class="video-modal">
+        <div class="video-modal-content">
+            <button id="video-close" class="video-close" aria-label="Close video">×</button>
+            <video id="intro-video" class="intro-video" controls>
+                <source src="videos/Coupagami Intro.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <button id="video-play-btn" class="video-play-btn">▶ Play</button>
         </div>
     </div>
 

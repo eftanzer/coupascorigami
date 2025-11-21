@@ -1,4 +1,154 @@
 // Coupa Scorigami JavaScript
+// Embedded achievements data (works without server)
+const ACHIEVEMENTS_DATA = {
+    "achievements": [
+        {
+            "score": 34,
+            "date": "2025-11-19",
+            "username": "Jill Wilkins",
+            "image": "images/wilkins.jpeg"
+        },
+        {
+            "score": 35,
+            "date": "2025-11-19",
+            "username": "Annie Tedesco",
+            "image": "images/tedesco.jpeg"
+        },
+        {
+            "score": 43,
+            "date": "2025-10-21",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 44,
+            "date": "2025-04-22",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 46,
+            "date": "2025-11-20",
+            "username": "Annie Tedesco",
+            "image": "images/tedesco.jpeg"
+        },
+        {
+            "score": 47,
+            "date": "2025-10-15",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 48,
+            "date": "2025-08-19",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 58,
+            "date": "2025-10-10",
+            "username": "Steve Winton",
+            "image": "images/swinton.jpeg"
+        },
+        {
+            "score": 64,
+            "date": "2025-10-24",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 65,
+            "date": "2025-11-04",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 69,
+            "date": "2025-10-31",
+            "username": "David Alessi",
+            "image": "images/alessi.png"
+        },
+        {
+            "score": 72,
+            "date": "2025-11-12",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 73,
+            "date": "2025-09-09",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 77,
+            "date": "2025-11-18",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 78,
+            "date": "2025-06-06",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 79,
+            "date": "2025-04-30",
+            "username": "Andrew MacKenzie",
+            "image": "images/mackenzie.jpeg"
+        },
+        {
+            "score": 80,
+            "date": "2025-09-12",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 81,
+            "date": "2025-03-05",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 82,
+            "date": "2025-01-31",
+            "username": "Andrew MacKenzie",
+            "image": "images/mackenzie.jpeg"
+        },
+        {
+            "score": 85,
+            "date": "2025-10-16",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 88,
+            "date": "2025-08-08",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 95,
+            "date": "2025-11-20",
+            "username": "Ryan Williams",
+            "image": "images/ryan_williams.jpeg"
+        },
+        {
+            "score": 98,
+            "date": "2025-06-11",
+            "username": "James Bowes",
+            "image": "images/bowes.jpeg"
+        },
+        {
+            "score": 99,
+            "date": "2025-02-07",
+            "username": "Ezra Tanzer",
+            "image": "images/tanzer.jpeg"
+        }
+    ]
+};
+
 class CoupaScorigami {
     constructor() {
         this.achievements = [];
@@ -7,30 +157,15 @@ class CoupaScorigami {
         this.init();
     }
 
-    async init() {
-        try {
-            await this.loadAchievements();
-            this.createGrid();
-            this.updateStats();
-        } catch (error) {
-            console.error('Error initializing Coupa Scorigami:', error);
-            this.createGrid(); // Create grid even if data loading fails
-            this.updateStats();
-        }
+    init() {
+        this.loadAchievements();
+        this.createGrid();
+        this.updateStats();
     }
 
-    async loadAchievements() {
-        try {
-            const response = await fetch('data/achievements.json');
-            if (!response.ok) {
-                throw new Error('Could not load achievements data');
-            }
-            const data = await response.json();
-            this.achievements = this.processDuplicateScores(data.achievements || []);
-        } catch (error) {
-            console.warn('No achievements data found, starting with empty grid');
-            this.achievements = [];
-        }
+    loadAchievements() {
+        // Use embedded data - works without server
+        this.achievements = this.processDuplicateScores(ACHIEVEMENTS_DATA.achievements || []);
     }
 
     processDuplicateScores(achievements) {
@@ -52,9 +187,6 @@ class CoupaScorigami {
                 if (currentDate < existingDate) {
                     // Current achievement is earlier, replace the existing one
                     scoreMap.set(score, achievement);
-                    console.log(`Duplicate score ${score}: Keeping earlier date ${achievement.date} (${achievement.username}) over ${existingAchievement.date} (${existingAchievement.username})`);
-                } else {
-                    console.log(`Duplicate score ${score}: Keeping earlier date ${existingAchievement.date} (${existingAchievement.username}) over ${achievement.date} (${achievement.username})`);
                 }
             }
         });
@@ -233,16 +365,145 @@ class CoupaScorigami {
     }
 
     // Method to refresh data (useful for development)
-    async refresh() {
-        await this.loadAchievements();
+    refresh() {
+        this.loadAchievements();
         this.createGrid();
         this.updateStats();
+    }
+}
+
+// Video Modal Handler
+class VideoModalHandler {
+    constructor() {
+        this.modal = document.getElementById('video-modal');
+        this.video = document.getElementById('intro-video');
+        this.icon = document.getElementById('video-icon');
+        this.closeBtn = document.getElementById('video-close');
+        this.playBtn = document.getElementById('video-play-btn');
+        this.init();
+    }
+
+    init() {
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        // Show modal on page load
+        this.showModal();
+    }
+
+    setupEventListeners() {
+        // Video ended - collapse to icon
+        this.video.addEventListener('ended', () => {
+            this.shrinkToIcon();
+        });
+
+        // Close button - collapse to icon
+        this.closeBtn.addEventListener('click', () => {
+            this.shrinkToIcon();
+        });
+
+        // Icon click - show modal again
+        this.icon.addEventListener('click', () => {
+            this.showModal();
+        });
+
+        // Play button click
+        this.playBtn.addEventListener('click', () => {
+            this.playVideo();
+        });
+
+        // Video playing - hide play button
+        this.video.addEventListener('play', () => {
+            this.playBtn.classList.add('hidden');
+        });
+
+        // Video paused - show play button (if not ended)
+        this.video.addEventListener('pause', () => {
+            if (!this.video.ended) {
+                this.playBtn.classList.remove('hidden');
+            }
+        });
+    }
+
+    showModal() {
+        // Reset video state
+        this.video.currentTime = 0;
+        this.video.pause();
+        
+        // Show modal
+        this.modal.classList.remove('hidden', 'shrinking');
+        this.modal.style.display = 'flex';
+        
+        // Hide icon
+        this.icon.style.display = 'none';
+        
+        // Show play button
+        this.playBtn.classList.remove('hidden');
+    }
+
+    playVideo() {
+        this.video.play();
+        this.playBtn.classList.add('hidden');
+    }
+
+    shrinkToIcon() {
+        // Pause video
+        this.video.pause();
+        
+        // Get icon position relative to viewport
+        // Icon is positioned at top: 20px, right: 20px within the container
+        const iconSize = 60; // 60px width/height
+        const iconTop = 20;
+        const iconRight = 20;
+        
+        // Get container position to calculate absolute icon position
+        const container = document.querySelector('.container');
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate target position (center of icon) relative to viewport
+        const targetX = containerRect.right - iconRight - iconSize / 2;
+        const targetY = containerRect.top + iconTop + iconSize / 2;
+        
+        // Get current modal content position (center of viewport)
+        const modalContent = this.modal.querySelector('.video-modal-content');
+        const modalRect = modalContent.getBoundingClientRect();
+        const currentX = modalRect.left + modalRect.width / 2;
+        const currentY = modalRect.top + modalRect.height / 2;
+        
+        // Calculate translation needed
+        const translateX = targetX - currentX;
+        const translateY = targetY - currentY;
+        
+        // Calculate scale (icon size relative to modal content)
+        const scale = iconSize / Math.max(modalRect.width, modalRect.height);
+        
+        // Apply transform
+        modalContent.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        
+        // Add shrinking class for animation
+        this.modal.classList.add('shrinking');
+        
+        // After animation completes, hide modal and show icon
+        setTimeout(() => {
+            this.modal.classList.add('hidden');
+            this.modal.classList.remove('shrinking');
+            this.modal.style.display = 'none';
+            
+            // Show icon in upper right corner
+            this.icon.style.display = 'block';
+            
+            // Reset modal transform for next time
+            setTimeout(() => {
+                modalContent.style.transform = '';
+            }, 100);
+        }, 800); // Match animation duration
     }
 }
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.coupaScorigami = new CoupaScorigami();
+    window.videoModalHandler = new VideoModalHandler();
 });
 
 // Add some fun interactions
@@ -258,8 +519,6 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.style.transform = 'scale(1)';
     });
 
-    // Console message for developers
-    console.log('🧾 Coupa Scorigami loaded! Use window.coupaScorigami.refresh() to reload data.');
 });
 
 // Keyboard shortcuts for convenience
@@ -267,6 +526,5 @@ document.addEventListener('keydown', (e) => {
     // Press 'R' to refresh data
     if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) {
         window.coupaScorigami?.refresh();
-        console.log('Data refreshed!');
     }
 });
