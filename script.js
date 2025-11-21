@@ -325,11 +325,9 @@ class CoupaScorigami {
     updateStats() {
         const achievedCount = this.achievements.length;
         const remainingCount = 100 - achievedCount;
-        const completionPercentage = Math.round((achievedCount / 100) * 100);
 
         document.getElementById('achieved-count').textContent = achievedCount;
         document.getElementById('remaining-count').textContent = remainingCount;
-        document.getElementById('completion-percentage').textContent = `${completionPercentage}%`;
 
         // Add some animation to the stats
         this.animateStats();

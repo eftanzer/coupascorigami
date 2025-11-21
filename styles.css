@@ -157,7 +157,8 @@ header p {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    min-width: 150px;
+    flex: 0 1 300px;
+    max-width: 300px;
 }
 
 .stat-number {
