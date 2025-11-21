@@ -297,21 +297,40 @@ class CoupaScorigami {
 
     positionTooltip(event) {
         const tooltipRect = this.tooltip.getBoundingClientRect();
+        const container = this.tooltip.parentElement; // Get the container
+        const containerRect = container.getBoundingClientRect();
+        
+        // Convert mouse position to container-relative coordinates
+        const mouseX = event.clientX - containerRect.left;
+        const mouseY = event.clientY - containerRect.top;
+        
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        let x = event.pageX + 15;
-        let y = event.pageY - tooltipRect.height / 2;
+        let x = mouseX + 15;
+        let y = mouseY - tooltipRect.height / 2;
 
-        // Adjust if tooltip would go off screen
-        if (x + tooltipRect.width > viewportWidth) {
-            x = event.pageX - tooltipRect.width - 15;
+        // Check if tooltip would go off the right edge of the viewport
+        const tooltipRightEdgeViewport = containerRect.left + x + tooltipRect.width;
+        if (tooltipRightEdgeViewport > viewportWidth) {
+            x = mouseX - tooltipRect.width - 15;
         }
 
-        if (y < 0) {
-            y = 10;
-        } else if (y + tooltipRect.height > viewportHeight) {
-            y = viewportHeight - tooltipRect.height - 10;
+        // Ensure tooltip doesn't go off left edge of container
+        if (x < 0) {
+            x = 10;
+        }
+
+        // Check if tooltip would go off top of viewport
+        const tooltipTopEdgeViewport = containerRect.top + y;
+        if (tooltipTopEdgeViewport < 0) {
+            y = mouseY + 20; // Position below cursor instead
+        }
+        
+        // Check if tooltip would go off bottom of viewport
+        const tooltipBottomEdgeViewport = containerRect.top + y + tooltipRect.height;
+        if (tooltipBottomEdgeViewport > viewportHeight) {
+            y = containerRect.height - tooltipRect.height - 10;
         }
 
         this.tooltip.style.left = `${x}px`;
