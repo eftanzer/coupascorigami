@@ -1,2 +1,5 @@
 # Snyk binary - too large for GitHub
 snyk-macos-arm64
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor/rules/snyk_rules.mdc
