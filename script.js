@@ -75,6 +75,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/bowes.jpeg"
         },
         {
+            "score": 62,
+            "date": "2025-11-01",
+            "username": "Alison Gilles",
+            "image": "images/gilles.jpeg"
+        },
+        {
             "score": 63,
             "date": "2026-01-23",
             "username": "Alison Gilles",
@@ -157,6 +163,12 @@ const ACHIEVEMENTS_DATA = {
             "date": "2025-08-08",
             "username": "Ezra Tanzer",
             "image": "images/tanzer.jpeg"
+        },
+        {
+            "score": 89,
+            "date": "2026-01-12",
+            "username": "Alison Gilles",
+            "image": "images/gilles.jpeg"
         },
         {
             "score": 95,
