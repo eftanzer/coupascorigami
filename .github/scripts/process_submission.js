@@ -163,23 +163,6 @@ async function processSubmission() {
     const scriptPath = path.join(process.cwd(), 'script.js');
     let scriptContent = fs.readFileSync(scriptPath, 'utf8');
 
-    // Find the ACHIEVEMENTS_DATA section
-    const achievementsMatch = scriptContent.match(/(const ACHIEVEMENTS_DATA = \{[\s\S]*?"achievements": \[)([\s\S]*?)(\s*\]\s*\};)/);
-    
-    if (!achievementsMatch) {
-      throw new Error('Could not find ACHIEVEMENTS_DATA in script.js');
-    }
-
-    const [, prefix, achievementsContent, suffix] = achievementsMatch;
-
-    // Create new achievement entry
-    const newAchievement = {
-      score: parseInt(score),
-      date: date,
-      username: fullName,
-      image: imagePath
-    };
-
     // Escape special characters for JSON
     function escapeJson(str) {
       return str.replace(/\\/g, '\\\\')
@@ -189,32 +172,36 @@ async function processSubmission() {
                 .replace(/\t/g, '\\t');
     }
 
-    // Parse existing achievements to find insertion point
-    // We'll add to the end for simplicity, but could sort by score if needed
+    // Build the new achievement entry
     const indent = '        ';
-    const newEntry = `${indent}{\n` +
-                     `${indent}    "score": ${newAchievement.score},\n` +
-                     `${indent}    "date": "${escapeJson(newAchievement.date)}",\n` +
-                     `${indent}    "username": "${escapeJson(newAchievement.username)}",\n` +
-                     `${indent}    "image": "${escapeJson(newAchievement.image)}"\n` +
+    const newEntry = `,\n${indent}{\n` +
+                     `${indent}    "score": ${parseInt(score)},\n` +
+                     `${indent}    "date": "${escapeJson(date)}",\n` +
+                     `${indent}    "username": "${escapeJson(fullName)}",\n` +
+                     `${indent}    "image": "${escapeJson(imagePath)}"\n` +
                      `${indent}}`;
 
-    // Add comma to last entry if needed
-    const trimmedContent = achievementsContent.trim();
-    const hasTrailingComma = trimmedContent.endsWith(',');
-    
-    let updatedAchievements = achievementsContent;
-    if (!hasTrailingComma && trimmedContent.length > 0) {
-      // Add comma to the last entry
-      const lastBraceIndex = updatedAchievements.lastIndexOf('}');
-      updatedAchievements = updatedAchievements.substring(0, lastBraceIndex + 1) + ',' + updatedAchievements.substring(lastBraceIndex + 1);
+    // Find the last closing brace+bracket of the achievements array: "}\n    ]\n};"
+    // Insert the new entry just before the final "}" that closes the last achievement object
+    const marker = '    ]\n};';
+    const markerIndex = scriptContent.indexOf(marker);
+
+    if (markerIndex === -1) {
+      throw new Error('Could not find end of achievements array in script.js');
     }
 
-    // Add new entry
-    updatedAchievements = updatedAchievements + '\n' + newEntry;
+    // Find the last "}" before the marker (the closing brace of the last achievement entry)
+    const beforeMarker = scriptContent.substring(0, markerIndex);
+    const lastBraceIndex = beforeMarker.lastIndexOf('}');
 
-    // Reconstruct the file
-    scriptContent = prefix + updatedAchievements + suffix;
+    if (lastBraceIndex === -1) {
+      throw new Error('Could not find last achievement entry in script.js');
+    }
+
+    // Insert new entry after the last achievement's closing brace
+    scriptContent = scriptContent.substring(0, lastBraceIndex + 1) +
+                    newEntry +
+                    scriptContent.substring(lastBraceIndex + 1);
 
     // Write back to script.js
     fs.writeFileSync(scriptPath, scriptContent, 'utf8');
