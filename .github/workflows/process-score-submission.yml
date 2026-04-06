@@ -11,10 +11,26 @@ permissions:
 
 jobs:
   process-submission:
-    if: contains(github.event.issue.labels.*.name, 'score-submission')
+    if: >-
+      contains(github.event.issue.labels.*.name, 'score-submission') ||
+      startsWith(github.event.issue.title, '[Score Submission]')
     runs-on: ubuntu-latest
     
     steps:
+      - name: Apply label if missing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.issue.labels.map(l => l.name);
+            if (!labels.includes('score-submission')) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: ['score-submission']
+              });
+            }
+    
       - name: Checkout repository
         uses: actions/checkout@v4
         
