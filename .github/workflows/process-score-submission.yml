@@ -1,0 +1,220 @@
+name: Process Score Submission
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process-submission:
+    if: contains(github.event.issue.labels.*.name, 'score-submission')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Parse issue body
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            const issueNumber = context.payload.issue.number;
+            
+            // Parse form data
+            const scoreMatch = issueBody.match(/### Score\s*\n\s*(.+)/);
+            const dateMatch = issueBody.match(/### Date\s*\n\s*(.+)/);
+            const nameMatch = issueBody.match(/### Full Name\s*\n\s*(.+)/);
+            const firstScoreMatch = issueBody.match(/- \[x\] This is my first score submission/i);
+            
+            const score = scoreMatch ? scoreMatch[1].trim() : '';
+            const date = dateMatch ? dateMatch[1].trim() : '';
+            const fullName = nameMatch ? nameMatch[1].trim() : '';
+            const isFirstScore = !!firstScoreMatch;
+            
+            // Validate
+            const errors = [];
+            
+            if (!score || isNaN(parseInt(score))) {
+              errors.push('Score must be a valid number');
+            } else {
+              const scoreNum = parseInt(score);
+              if (scoreNum < 1 || scoreNum > 100) {
+                errors.push('Score must be between 1 and 100');
+              }
+            }
+            
+            if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+              errors.push('Date must be in YYYY-MM-DD format');
+            }
+            
+            if (!fullName || fullName.split(' ').length < 2) {
+              errors.push('Full name must include first and last name');
+            }
+            
+            // Extract images from issue body
+            const imageRegex = /!\[.*?\]\((https:\/\/[^\)]+)\)/g;
+            const images = [];
+            let match;
+            while ((match = imageRegex.exec(issueBody)) !== null) {
+              images.push(match[1]);
+            }
+            
+            if (images.length === 0) {
+              errors.push('At least one image (evidence screenshot) is required');
+            }
+            
+            if (isFirstScore && images.length < 2) {
+              errors.push('For first submissions, both profile photo and evidence screenshot are required');
+            }
+            
+            core.setOutput('score', score);
+            core.setOutput('date', date);
+            core.setOutput('fullName', fullName);
+            core.setOutput('isFirstScore', isFirstScore);
+            core.setOutput('images', JSON.stringify(images));
+            core.setOutput('errors', JSON.stringify(errors));
+            core.setOutput('hasErrors', errors.length > 0);
+            
+            return { score, date, fullName, isFirstScore, images, errors };
+      
+      - name: Report validation errors
+        if: steps.parse.outputs.hasErrors == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const errors = JSON.parse('${{ steps.parse.outputs.errors }}');
+            const errorList = errors.map(e => `- ${e}`).join('\n');
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `## ❌ Validation Failed\n\nPlease fix the following errors:\n\n${errorList}\n\nOnce fixed, please close this issue and create a new one with the corrected information.`
+            });
+            
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              labels: ['score-submission', 'validation-failed']
+            });
+            
+            core.setFailed('Validation failed');
+      
+      - name: Check if score exists
+        if: steps.parse.outputs.hasErrors == 'false'
+        id: check_duplicate
+        run: |
+          SCORE="${{ steps.parse.outputs.score }}"
+          if grep -q "\"score\": $SCORE," script.js; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Report duplicate score
+        if: steps.check_duplicate.outputs.exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.parse.outputs.score }}';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `## ℹ️ Score Already Exists\n\nScore **${score}** has already been achieved by someone else! Check the grid on the [Coupa Scorigami page](https://eftanzer.github.io/coupascorigami/) to see who got it first.\n\nTry for a different score next time! 🎯`
+            });
+            
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              labels: ['score-submission', 'duplicate-score']
+            });
+            
+            core.setFailed('Score already exists');
+      
+      - name: Process submission
+        if: steps.parse.outputs.hasErrors == 'false' && steps.check_duplicate.outputs.exists == 'false'
+        id: process
+        run: |
+          # Install dependencies
+          npm install
+          
+          # Run processing script
+          node .github/scripts/process_submission.js \
+            "${{ steps.parse.outputs.score }}" \
+            "${{ steps.parse.outputs.date }}" \
+            "${{ steps.parse.outputs.fullName }}" \
+            "${{ steps.parse.outputs.isFirstScore }}" \
+            '${{ steps.parse.outputs.images }}' \
+            "${{ github.event.issue.number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Pull Request
+        if: steps.parse.outputs.hasErrors == 'false' && steps.check_duplicate.outputs.exists == 'false'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Add score ${{ steps.parse.outputs.score }} - ${{ steps.parse.outputs.fullName }}"
+          branch: score-submission-${{ steps.parse.outputs.score }}-${{ github.run_number }}
+          delete-branch: true
+          title: "New Score: ${{ steps.parse.outputs.score }} - ${{ steps.parse.outputs.fullName }}"
+          body: |
+            ## New Score Submission
+            
+            - **Score**: ${{ steps.parse.outputs.score }}
+            - **Date**: ${{ steps.parse.outputs.date }}
+            - **Submitted by**: ${{ steps.parse.outputs.fullName }}
+            - **First submission**: ${{ steps.parse.outputs.isFirstScore }}
+            
+            This PR was automatically created from issue #${{ github.event.issue.number }}
+            
+            ### Changes
+            - Updated `ACHIEVEMENTS_DATA` in script.js with new score entry
+            ${{ steps.parse.outputs.isFirstScore == 'true' && '- Added user profile image to images/ directory' || '' }}
+            - Added evidence screenshot to evidence/ directory
+            
+            Please review the submission and merge if everything looks correct! 🎉
+          labels: |
+            score-submission
+            automated-pr
+      
+      - name: Comment on issue with PR link
+        if: steps.create_pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = '${{ steps.create_pr.outputs.pull-request-number }}';
+            const prUrl = '${{ steps.create_pr.outputs.pull-request-url }}';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `## ✅ Submission Processed Successfully!\n\nYour score submission has been validated and a Pull Request has been created:\n\n🔗 **PR #${prNumber}**: ${prUrl}\n\nThe maintainers will review your submission. Once approved and merged, your score will appear on the Coupa Scorigami board!\n\nThank you for your contribution! 🎉`
+            });
+            
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed',
+              labels: ['score-submission', 'processed']
+            });

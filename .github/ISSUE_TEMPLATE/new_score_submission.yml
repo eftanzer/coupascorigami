@@ -1,0 +1,83 @@
+name: Submit New Score
+description: Submit a new Coupa expense report score achievement
+title: "[Score Submission] Score: "
+labels: ["score-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit Your Score Achievement
+        Thank you for contributing to Coupa Scorigami! Please fill out the form below to submit your score.
+        
+  - type: input
+    id: score
+    attributes:
+      label: Score
+      description: The expense report score you achieved (1-100)
+      placeholder: "42"
+    validations:
+      required: true
+
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: Date you achieved this score (YYYY-MM-DD format)
+      placeholder: "2026-01-30"
+    validations:
+      required: true
+
+  - type: input
+    id: fullname
+    attributes:
+      label: Full Name
+      description: Your full name (First Last)
+      placeholder: "John Smith"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: first_score
+    attributes:
+      label: First Score Submission
+      description: Check this box if this is your FIRST score submission to Coupa Scorigami
+      options:
+        - label: This is my first score submission (I will upload a profile photo)
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Image Attachments
+        
+        Please attach the following images to this issue:
+        
+        1. **Evidence Screenshot** (Required): A screenshot from Coupa showing your score
+        2. **Profile Photo** (Required ONLY if this is your first score): A photo of yourself
+        
+        **How to attach images:**
+        - Drag and drop images into the text area below
+        - Or click the text area and use the image upload button
+        - Supported formats: JPEG, PNG
+        - Recommended size: Under 5MB per image
+        
+  - type: textarea
+    id: images
+    attributes:
+      label: Image Attachments
+      description: Drag and drop your evidence screenshot (and profile photo if first submission) here
+      placeholder: Attach images by dragging them here or pasting from clipboard
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        After submitting, our automation will:
+        1. Validate your submission
+        2. Check if the score already exists
+        3. Create a Pull Request with your achievement
+        4. Comment on this issue with the PR link
+        
+        Thank you for your contribution! 🎉
