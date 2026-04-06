@@ -476,10 +476,11 @@ class CoupaScorigami {
             return this.parseLocalDate(a.date) - this.parseLocalDate(b.date);
         });
 
-        // Get date range
+        // Get date range - extend one day past today so today's points aren't on the edge
         const earliestDate = this.parseLocalDate(sortedAchievements[0].date);
-        const currentDate = new Date();
-        const dateRange = currentDate - earliestDate;
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dateRange = tomorrow - earliestDate;
 
         // Group achievements by date and create cumulative data points
         const dataPointsByDate = new Map();
@@ -507,9 +508,9 @@ class CoupaScorigami {
         // Convert to array
         const dataPoints = Array.from(dataPointsByDate.values());
 
-        // Add current date point with same count as last achievement
+        // Add end-of-range point so the line extends to tomorrow
         dataPoints.push({
-            date: currentDate,
+            date: tomorrow,
             dateStr: null,
             count: cumulativeCount,
             scores: []
@@ -519,14 +520,14 @@ class CoupaScorigami {
         const svgRect = svg.getBoundingClientRect();
         const width = svgRect.width;
         const height = svgRect.height;
-        const padding = { top: 15, right: 15, bottom: 30, left: 50 };
+        const padding = { top: 20, right: 20, bottom: 20, left: 55 };
         const chartWidth = width - padding.left - padding.right;
         const chartHeight = height - padding.top - padding.bottom;
 
         // Scales
         const xScale = (date) => {
             const ratio = (date - earliestDate) / dateRange;
-            return padding.left + (ratio * chartWidth);
+            return padding.left + (Math.min(ratio, 1) * chartWidth);
         };
 
         const yScale = (count) => {
@@ -649,18 +650,6 @@ class CoupaScorigami {
             svg.appendChild(text);
         });
 
-        // X-axis labels (dates)
-        const dateLabels = [earliestDate, currentDate];
-        dateLabels.forEach(date => {
-            const x = xScale(date);
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', x);
-            text.setAttribute('y', padding.top + chartHeight + 15);
-            text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('class', 'chart-axis-text');
-            text.textContent = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            svg.appendChild(text);
-        });
     }
 
     showDateTooltip(event, dateStr) {

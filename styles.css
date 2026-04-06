@@ -230,7 +230,6 @@ header p {
     background: white;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    padding: 15px;
 }
 
 .chart-dot {
@@ -509,7 +508,6 @@ header p {
 
     .progress-chart {
         height: 100px;
-        padding: 10px;
     }
 
     .chart-axis-text {
@@ -567,7 +565,6 @@ header p {
 
     .progress-chart {
         height: 80px;
-        padding: 8px;
     }
 
     .chart-axis-text {
