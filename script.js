@@ -3,6 +3,12 @@
 const ACHIEVEMENTS_DATA = {
     "achievements": [
         {
+            "score": 2,
+            "date": "2026-04-06",
+            "username": "Ezra Tanzer",
+            "image": "images/ezra_tanzer.jpeg"
+        },
+        {
             "score": 19,
             "date": "2026-04-06",
             "username": "Marcelo Sousa",
