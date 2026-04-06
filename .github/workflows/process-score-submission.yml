@@ -78,11 +78,19 @@ jobs:
               errors.push('Full name must include first and last name');
             }
             
-            // Extract images from issue body
-            const imageRegex = /!\[.*?\]\((https:\/\/[^\)]+)\)/g;
+            // Extract images from issue body (handles both markdown and HTML img formats)
             const images = [];
             let match;
-            while ((match = imageRegex.exec(issueBody)) !== null) {
+            
+            // Match markdown format: ![alt](url)
+            const mdImageRegex = /!\[.*?\]\((https:\/\/[^\)]+)\)/g;
+            while ((match = mdImageRegex.exec(issueBody)) !== null) {
+              images.push(match[1]);
+            }
+            
+            // Match HTML img format: <img ... src="url" ... />
+            const htmlImageRegex = /<img[^>]+src="(https:\/\/[^"]+)"[^>]*\/?>/g;
+            while ((match = htmlImageRegex.exec(issueBody)) !== null) {
               images.push(match[1]);
             }
             
