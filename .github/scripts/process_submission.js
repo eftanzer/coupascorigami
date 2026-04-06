@@ -6,34 +6,82 @@ const https = require('https');
 
 // Parse command line arguments
 const [score, date, fullName, isFirstScore, imagesJson, issueNumber] = process.argv.slice(2);
+
+// Validate inputs
+if (!score || !/^\d+$/.test(score)) {
+  console.error('Invalid score format');
+  process.exit(1);
+}
+
+if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  console.error('Invalid date format');
+  process.exit(1);
+}
+
+if (!fullName || fullName.trim().length === 0) {
+  console.error('Invalid full name');
+  process.exit(1);
+}
+
 const images = JSON.parse(imagesJson);
 const isFirst = isFirstScore === 'true';
 
 console.log('Processing submission:', { score, date, fullName, isFirst, imageCount: images.length });
 
+// Sanitize filename to prevent path traversal
+function sanitizeFilename(filename) {
+  // Remove path separators and traversal sequences
+  return filename.replace(/[/\\.\0]/g, '_').replace(/_+/g, '_');
+}
+
+// Validate that a path is within an allowed directory
+function validatePath(filepath, allowedDir) {
+  const resolvedPath = path.resolve(filepath);
+  const resolvedAllowedDir = path.resolve(allowedDir);
+  
+  if (!resolvedPath.startsWith(resolvedAllowedDir + path.sep) && resolvedPath !== resolvedAllowedDir) {
+    throw new Error(`Path traversal detected: ${filepath} is outside allowed directory ${allowedDir}`);
+  }
+  
+  return resolvedPath;
+}
+
 // Generate image filename from name
 function generateImageFilename(name) {
   const parts = name.toLowerCase().split(' ');
-  const firstName = parts[0];
-  const lastName = parts[parts.length - 1];
+  const firstName = sanitizeFilename(parts[0]);
+  const lastName = sanitizeFilename(parts[parts.length - 1]);
   return `${firstName}_${lastName}`;
 }
 
 // Download image from URL
-function downloadImage(url, filepath) {
+function downloadImage(url, filepath, allowedDir) {
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(filepath);
-    https.get(url, (response) => {
-      response.pipe(file);
-      file.on('finish', () => {
-        file.close();
-        console.log(`Downloaded: ${filepath}`);
-        resolve();
+    try {
+      // Validate path before writing
+      const validatedPath = validatePath(filepath, allowedDir);
+      
+      const file = fs.createWriteStream(validatedPath);
+      https.get(url, (response) => {
+        response.pipe(file);
+        file.on('finish', () => {
+          file.close();
+          console.log(`Downloaded: ${validatedPath}`);
+          resolve();
+        });
+      }).on('error', (err) => {
+        // Validate path before unlinking
+        try {
+          const validatedUnlinkPath = validatePath(filepath, allowedDir);
+          fs.unlink(validatedUnlinkPath, () => {});
+        } catch (e) {
+          // Path validation failed, skip unlink
+        }
+        reject(err);
       });
-    }).on('error', (err) => {
-      fs.unlink(filepath, () => {});
-      reject(err);
-    });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
@@ -70,21 +118,23 @@ async function processSubmission() {
 
     // Generate filenames
     const imageBasename = generateImageFilename(fullName);
+    const sanitizedScore = sanitizeFilename(score);
     let profileImagePath = null;
     
     // Download profile image if first submission
     if (isFirst && profileImageUrl) {
       const ext = getExtension(profileImageUrl);
       const profileFilename = `${imageBasename}.${ext}`;
-      profileImagePath = path.join(process.cwd(), 'images', profileFilename);
-      await downloadImage(profileImageUrl, profileImagePath);
+      const imagesDir = path.join(process.cwd(), 'images');
+      profileImagePath = path.join(imagesDir, profileFilename);
+      await downloadImage(profileImageUrl, profileImagePath, imagesDir);
     }
 
     // Download evidence screenshot
     const evidenceExt = getExtension(evidenceImageUrl);
-    const evidenceFilename = `score_${score}_${imageBasename}.${evidenceExt}`;
+    const evidenceFilename = `score_${sanitizedScore}_${imageBasename}.${evidenceExt}`;
     const evidencePath = path.join(evidenceDir, evidenceFilename);
-    await downloadImage(evidenceImageUrl, evidencePath);
+    await downloadImage(evidenceImageUrl, evidencePath, evidenceDir);
 
     // Determine image path for ACHIEVEMENTS_DATA
     let imagePath;
@@ -96,7 +146,11 @@ async function processSubmission() {
       // Existing user - find their existing image
       const imagesDir = path.join(process.cwd(), 'images');
       const existingImages = fs.readdirSync(imagesDir)
-        .filter(f => f.startsWith(imageBasename) && (f.endsWith('.jpeg') || f.endsWith('.png') || f.endsWith('.jpg')));
+        .filter(f => {
+          // Only allow safe filenames (alphanumeric, underscore, and common image extensions)
+          const isSafe = /^[a-z0-9_]+\.(jpeg|jpg|png)$/i.test(f);
+          return isSafe && f.startsWith(imageBasename) && (f.endsWith('.jpeg') || f.endsWith('.png') || f.endsWith('.jpg'));
+        });
       
       if (existingImages.length > 0) {
         imagePath = `images/${existingImages[0]}`;
@@ -126,14 +180,23 @@ async function processSubmission() {
       image: imagePath
     };
 
+    // Escape special characters for JSON
+    function escapeJson(str) {
+      return str.replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r')
+                .replace(/\t/g, '\\t');
+    }
+
     // Parse existing achievements to find insertion point
     // We'll add to the end for simplicity, but could sort by score if needed
     const indent = '        ';
     const newEntry = `${indent}{\n` +
                      `${indent}    "score": ${newAchievement.score},\n` +
-                     `${indent}    "date": "${newAchievement.date}",\n` +
-                     `${indent}    "username": "${newAchievement.username}",\n` +
-                     `${indent}    "image": "${newAchievement.image}"\n` +
+                     `${indent}    "date": "${escapeJson(newAchievement.date)}",\n` +
+                     `${indent}    "username": "${escapeJson(newAchievement.username)}",\n` +
+                     `${indent}    "image": "${escapeJson(newAchievement.image)}"\n` +
                      `${indent}}`;
 
     // Add comma to last entry if needed
