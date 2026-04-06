@@ -730,6 +730,13 @@ class VideoModalHandler {
             this.shrinkToIcon();
         });
 
+        // Escape key - collapse to icon
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.modal.classList.contains('hidden')) {
+                this.shrinkToIcon();
+            }
+        });
+
         // Icon click - show modal again
         this.icon.addEventListener('click', () => {
             this.showModal();
