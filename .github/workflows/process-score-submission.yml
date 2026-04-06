@@ -13,7 +13,7 @@ jobs:
   process-submission:
     if: >-
       contains(github.event.issue.labels.*.name, 'score-submission') ||
-      startsWith(github.event.issue.title, '[Score Submission]')
+      startsWith(github.event.issue.title, 'New Score Submission')
     runs-on: ubuntu-latest
     
     steps:
@@ -55,8 +55,24 @@ jobs:
             
             const score = scoreMatch ? scoreMatch[1].trim() : '';
             const date = dateMatch ? dateMatch[1].trim() : '';
-            const fullName = nameMatch ? nameMatch[1].trim() : '';
+            let fullName = nameMatch ? nameMatch[1].trim() : '';
             const isFirstScore = !!firstScoreMatch;
+            
+            // If name is blank or placeholder, look up the GitHub profile name
+            if (!fullName || fullName === '_No response_') {
+              const issueAuthor = context.payload.issue.user.login;
+              try {
+                const { data: user } = await github.rest.users.getByUsername({
+                  username: issueAuthor
+                });
+                if (user.name && user.name.trim().split(' ').length >= 2) {
+                  fullName = user.name.trim();
+                  console.log(`Using GitHub profile name: ${fullName}`);
+                }
+              } catch (e) {
+                console.log(`Could not fetch profile for ${issueAuthor}`);
+              }
+            }
             
             // Validate
             const errors = [];
@@ -75,7 +91,7 @@ jobs:
             }
             
             if (!fullName || fullName.split(' ').length < 2) {
-              errors.push('Full name must include first and last name');
+              errors.push('Full name must include first and last name (or set your full name on your GitHub profile)');
             }
             
             // Extract images from issue body (handles both markdown and HTML img formats)

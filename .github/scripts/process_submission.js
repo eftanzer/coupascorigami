@@ -172,40 +172,77 @@ async function processSubmission() {
                 .replace(/\t/g, '\\t');
     }
 
-    // Build the new achievement entry
+    const newScore = parseInt(score);
     const indent = '        ';
-    const newEntry = `,\n${indent}{\n` +
-                     `${indent}    "score": ${parseInt(score)},\n` +
-                     `${indent}    "date": "${escapeJson(date)}",\n` +
-                     `${indent}    "username": "${escapeJson(fullName)}",\n` +
-                     `${indent}    "image": "${escapeJson(imagePath)}"\n` +
-                     `${indent}}`;
 
-    // Find the last closing brace+bracket of the achievements array: "}\n    ]\n};"
-    // Insert the new entry just before the final "}" that closes the last achievement object
-    const marker = '    ]\n};';
-    const markerIndex = scriptContent.indexOf(marker);
+    // Find the achievements array boundaries
+    const arrayStartMarker = '"achievements": [';
+    const arrayEndMarker = '    ]\n};';
+    const arrayStartIndex = scriptContent.indexOf(arrayStartMarker);
+    const arrayEndIndex = scriptContent.indexOf(arrayEndMarker);
 
-    if (markerIndex === -1) {
-      throw new Error('Could not find end of achievements array in script.js');
+    if (arrayStartIndex === -1 || arrayEndIndex === -1) {
+      throw new Error('Could not find achievements array in script.js');
     }
 
-    // Find the last "}" before the marker (the closing brace of the last achievement entry)
-    const beforeMarker = scriptContent.substring(0, markerIndex);
-    const lastBraceIndex = beforeMarker.lastIndexOf('}');
+    const contentStart = arrayStartIndex + arrayStartMarker.length;
+    const arrayContent = scriptContent.substring(contentStart, arrayEndIndex);
 
-    if (lastBraceIndex === -1) {
-      throw new Error('Could not find last achievement entry in script.js');
+    // Find the right position by locating each "score": N pattern
+    const scoreRegex = /"score":\s*(\d+)/g;
+    let insertAfterIndex = -1;
+    let insertBeforeIndex = -1;
+    let scoreMatch;
+    let lastEntryEnd = -1;
+
+    while ((scoreMatch = scoreRegex.exec(arrayContent)) !== null) {
+      const existingScore = parseInt(scoreMatch[1]);
+
+      // Find the closing "}" of this entry
+      const closingBrace = arrayContent.indexOf('}', scoreMatch.index + scoreMatch[0].length);
+
+      if (existingScore < newScore) {
+        insertAfterIndex = contentStart + closingBrace;
+        lastEntryEnd = contentStart + closingBrace;
+      } else if (existingScore > newScore && insertBeforeIndex === -1) {
+        insertBeforeIndex = scoreMatch.index;
+        break;
+      }
     }
 
-    // Insert new entry after the last achievement's closing brace
-    scriptContent = scriptContent.substring(0, lastBraceIndex + 1) +
-                    newEntry +
-                    scriptContent.substring(lastBraceIndex + 1);
+    // Build the new entry
+    const newEntryBlock = `\n${indent}{\n` +
+                          `${indent}    "score": ${newScore},\n` +
+                          `${indent}    "date": "${escapeJson(date)}",\n` +
+                          `${indent}    "username": "${escapeJson(fullName)}",\n` +
+                          `${indent}    "image": "${escapeJson(imagePath)}"\n` +
+                          `${indent}}`;
+
+    if (insertAfterIndex === -1) {
+      // New score is the smallest - insert at the beginning of the array
+      const firstEntryStart = arrayContent.search(/\S/);
+      if (firstEntryStart === -1) {
+        throw new Error('Empty achievements array');
+      }
+      const absoluteInsertPos = contentStart + firstEntryStart;
+      scriptContent = scriptContent.substring(0, absoluteInsertPos) +
+                      `{\n` +
+                      `${indent}    "score": ${newScore},\n` +
+                      `${indent}    "date": "${escapeJson(date)}",\n` +
+                      `${indent}    "username": "${escapeJson(fullName)}",\n` +
+                      `${indent}    "image": "${escapeJson(imagePath)}"\n` +
+                      `${indent}},\n${indent}` +
+                      scriptContent.substring(absoluteInsertPos);
+    } else {
+      // Insert after the found position, with comma
+      scriptContent = scriptContent.substring(0, insertAfterIndex + 1) +
+                      ',' + newEntryBlock +
+                      scriptContent.substring(insertAfterIndex + 1);
+    }
 
     // Write back to script.js
     fs.writeFileSync(scriptPath, scriptContent, 'utf8');
-    console.log('Updated script.js with new achievement');
+    console.log(`Updated script.js: inserted score ${newScore} in sorted position`);
 
     console.log('Submission processed successfully!');
     process.exit(0);

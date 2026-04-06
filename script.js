@@ -860,6 +860,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+// Set submit button URL with today's date pre-filled
+document.addEventListener('DOMContentLoaded', () => {
+    const submitBtn = document.getElementById('submit-score-btn');
+    if (submitBtn) {
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        const baseUrl = 'https://github.com/eftanzer/coupascorigami/issues/new';
+        const params = new URLSearchParams({
+            labels: 'score-submission',
+            template: 'new_score_submission.yml',
+            title: 'New Score Submission: ',
+            date: dateStr
+        });
+        submitBtn.href = `${baseUrl}?${params.toString()}`;
+    }
+});
+
 // Keyboard shortcuts for convenience
 document.addEventListener('keydown', (e) => {
     // Press 'R' to refresh data

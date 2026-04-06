@@ -1,6 +1,6 @@
 name: Submit New Score
 description: Submit a new Coupa expense report score achievement
-title: "[Score Submission] Score: "
+title: "New Score Submission: "
 labels: ["score-submission"]
 body:
   - type: markdown
@@ -31,10 +31,10 @@ body:
     id: fullname
     attributes:
       label: Full Name
-      description: Your full name (First Last)
+      description: Your full name (First Last). Leave blank to use your GitHub profile name.
       placeholder: "John Smith"
     validations:
-      required: true
+      required: false
 
   - type: checkboxes
     id: first_score
