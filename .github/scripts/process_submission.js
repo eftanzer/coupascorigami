@@ -2,10 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 
 // Parse command line arguments
-const [score, date, fullName, isFirstScore, imagesJson, issueNumber] = process.argv.slice(2);
+const [score, date, fullName] = process.argv.slice(2);
 
 // Validate inputs
 if (!score || !/^\d+$/.test(score)) {
@@ -23,27 +22,12 @@ if (!fullName || fullName.trim().length === 0) {
   process.exit(1);
 }
 
-const images = JSON.parse(imagesJson);
-const isFirst = isFirstScore === 'true';
-
-console.log('Processing submission:', { score, date, fullName, isFirst, imageCount: images.length });
+console.log('Processing submission:', { score, date, fullName });
 
 // Sanitize filename to prevent path traversal
 function sanitizeFilename(filename) {
   // Remove path separators and traversal sequences
   return filename.replace(/[/\\.\0]/g, '_').replace(/_+/g, '_');
-}
-
-// Validate that a path is within an allowed directory
-function validatePath(filepath, allowedDir) {
-  const resolvedPath = path.resolve(filepath);
-  const resolvedAllowedDir = path.resolve(allowedDir);
-  
-  if (!resolvedPath.startsWith(resolvedAllowedDir + path.sep) && resolvedPath !== resolvedAllowedDir) {
-    throw new Error(`Path traversal detected: ${filepath} is outside allowed directory ${allowedDir}`);
-  }
-  
-  return resolvedPath;
 }
 
 // Generate image filename from name
@@ -54,90 +38,29 @@ function generateImageFilename(name) {
   return `${firstName}_${lastName}`;
 }
 
-// Download image from URL
-function downloadImage(url, filepath, allowedDir) {
-  return new Promise((resolve, reject) => {
-    try {
-      // Validate path before writing
-      const validatedPath = validatePath(filepath, allowedDir);
-      
-      const file = fs.createWriteStream(validatedPath);
-      https.get(url, (response) => {
-        response.pipe(file);
-        file.on('finish', () => {
-          file.close();
-          console.log(`Downloaded: ${validatedPath}`);
-          resolve();
-        });
-      }).on('error', (err) => {
-        // Validate path before unlinking
-        try {
-          const validatedUnlinkPath = validatePath(filepath, allowedDir);
-          fs.unlink(validatedUnlinkPath, () => {});
-        } catch (e) {
-          // Path validation failed, skip unlink
-        }
-        reject(err);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// Determine file extension from URL
-function getExtension(url) {
-  const match = url.match(/\.(jpeg|jpg|png)(\?|$)/i);
-  if (match) {
-    return match[1].toLowerCase() === 'jpg' ? 'jpeg' : match[1].toLowerCase();
-  }
-  return 'jpeg'; // default
-}
-
-async function processSubmission() {
+function processSubmission() {
   try {
-    // Determine which image is which
-    let profileImageUrl = null;
-
-    if (isFirst && images.length >= 2) {
-      profileImageUrl = images[0];
-    }
-
-    // Generate filenames
     const imageBasename = generateImageFilename(fullName);
-    let profileImagePath = null;
-    
-    // Download profile image if first submission
-    if (isFirst && profileImageUrl) {
-      const ext = getExtension(profileImageUrl);
-      const profileFilename = `${imageBasename}.${ext}`;
-      const imagesDir = path.join(process.cwd(), 'images');
-      profileImagePath = path.join(imagesDir, profileFilename);
-      await downloadImage(profileImageUrl, profileImagePath, imagesDir);
-    }
 
-    // Determine image path for ACHIEVEMENTS_DATA
-    let imagePath;
-    if (isFirst && profileImagePath) {
-      // New user - use the profile image we just downloaded
-      const ext = getExtension(profileImageUrl);
-      imagePath = `images/${imageBasename}.${ext}`;
-    } else {
-      // Existing user - find their existing image
-      const imagesDir = path.join(process.cwd(), 'images');
-      const existingImages = fs.readdirSync(imagesDir)
-        .filter(f => {
-          // Only allow safe filenames (alphanumeric, underscore, and common image extensions)
-          const isSafe = /^[a-z0-9_]+\.(jpeg|jpg|png)$/i.test(f);
-          return isSafe && f.startsWith(imageBasename) && (f.endsWith('.jpeg') || f.endsWith('.png') || f.endsWith('.jpg'));
-        });
-      
-      if (existingImages.length > 0) {
-        imagePath = `images/${existingImages[0]}`;
-      } else {
-        throw new Error(`No existing image found for ${fullName}. If this is your first submission, please check the "First Score Submission" box.`);
-      }
+    // Check if user already has an image in the images directory
+    const imagesDir = path.join(process.cwd(), 'images');
+    const existingImages = fs.readdirSync(imagesDir)
+      .filter(f => {
+        const isSafe = /^[a-z0-9_]+\.(jpeg|jpg|png)$/i.test(f);
+        return isSafe && f.startsWith(imageBasename) && (f.endsWith('.jpeg') || f.endsWith('.png') || f.endsWith('.jpg'));
+      });
+    
+    const hasExistingImage = existingImages.length > 0;
+    const imagePath = hasExistingImage
+      ? `images/${existingImages[0]}`
+      : `images/${imageBasename}.jpeg`;
+
+    // Write result for the workflow to read
+    const outputFile = process.env.GITHUB_OUTPUT;
+    if (outputFile) {
+      fs.appendFileSync(outputFile, `needsPhoto=${!hasExistingImage}\n`);
     }
+    console.log(`User image found: ${hasExistingImage}`);
 
     // Read script.js
     const scriptPath = path.join(process.cwd(), 'script.js');

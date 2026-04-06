@@ -46,12 +46,9 @@ jobs:
             const scoreMatch = issueBody.match(/### Score\s*\n\s*(.+)/);
             const dateMatch = issueBody.match(/### Date\s*\n\s*(.+)/);
             const nameMatch = issueBody.match(/### Full Name\s*\n\s*(.+)/);
-            const firstScoreMatch = issueBody.match(/- \[x\] This is my first score submission/i);
-            
             const score = scoreMatch ? scoreMatch[1].trim() : '';
             const date = dateMatch ? dateMatch[1].trim() : '';
             let fullName = nameMatch ? nameMatch[1].trim() : '';
-            const isFirstScore = !!firstScoreMatch;
             
             // If name is blank or placeholder, look up the GitHub profile name
             if (!fullName || fullName === '_No response_') {
@@ -109,19 +106,12 @@ jobs:
               errors.push('At least one image (evidence screenshot) is required');
             }
             
-            if (isFirstScore && images.length < 2) {
-              errors.push('For first submissions, both profile photo and evidence screenshot are required');
-            }
-            
             core.setOutput('score', score);
             core.setOutput('date', date);
             core.setOutput('fullName', fullName);
-            core.setOutput('isFirstScore', isFirstScore);
             core.setOutput('images', JSON.stringify(images));
             core.setOutput('errors', JSON.stringify(errors));
             core.setOutput('hasErrors', errors.length > 0);
-            
-            return { score, date, fullName, isFirstScore, images, errors };
       
       - name: Report validation errors
         if: steps.parse.outputs.hasErrors == 'true'
@@ -190,13 +180,32 @@ jobs:
           node .github/scripts/process_submission.js \
             "${{ steps.parse.outputs.score }}" \
             "${{ steps.parse.outputs.date }}" \
-            "${{ steps.parse.outputs.fullName }}" \
-            "${{ steps.parse.outputs.isFirstScore }}" \
-            '${{ steps.parse.outputs.images }}' \
-            "${{ github.event.issue.number }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            "${{ steps.parse.outputs.fullName }}"
       
+      - name: Build PR body with evidence
+        if: steps.parse.outputs.hasErrors == 'false' && steps.check_duplicate.outputs.exists == 'false'
+        id: pr_body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const images = JSON.parse('${{ steps.parse.outputs.images }}');
+            const evidenceMarkdown = images.map(url => `![Evidence](${url})`).join('\n');
+            
+            const body = [
+              '## New Score Submission',
+              '',
+              `- **Score**: ${{ steps.parse.outputs.score }}`,
+              `- **Date**: ${{ steps.parse.outputs.date }}`,
+              `- **Submitted by**: ${{ steps.parse.outputs.fullName }}`,
+              '',
+              `Automatically created from issue #${{ github.event.issue.number }}.`,
+              '',
+              '### Evidence',
+              evidenceMarkdown
+            ].join('\n');
+            
+            core.setOutput('body', body);
+
       - name: Create Pull Request
         if: steps.parse.outputs.hasErrors == 'false' && steps.check_duplicate.outputs.exists == 'false'
         id: create_pr
@@ -207,23 +216,26 @@ jobs:
           branch: score-submission-${{ steps.parse.outputs.score }}-${{ github.run_number }}
           delete-branch: true
           title: "New Score: ${{ steps.parse.outputs.score }} - ${{ steps.parse.outputs.fullName }}"
-          body: |
-            ## New Score Submission
-            
-            - **Score**: ${{ steps.parse.outputs.score }}
-            - **Date**: ${{ steps.parse.outputs.date }}
-            - **Submitted by**: ${{ steps.parse.outputs.fullName }}
-            - **First submission**: ${{ steps.parse.outputs.isFirstScore }}
-            
-            Automatically created from issue #${{ github.event.issue.number }}.
-            
-            ### Changes
-            - Updated `ACHIEVEMENTS_DATA` in script.js with new score entry
-            ${{ steps.parse.outputs.isFirstScore == 'true' && '- Added user profile image to images/ directory' || '' }}
+          body: ${{ steps.pr_body.outputs.body }}
           labels: |
             score-submission
             automated-pr
       
+      - name: Comment if profile photo needed
+        if: steps.create_pr.outputs.pull-request-number && steps.process.outputs.needsPhoto == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = parseInt('${{ steps.create_pr.outputs.pull-request-number }}');
+            const fullName = '${{ steps.parse.outputs.fullName }}';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `**Note:** No existing profile photo was found for **${fullName}**. A reviewer will need to manually add a photo to the \`images/\` directory before merging this PR.`
+            });
+
       - name: Comment on issue with PR link
         if: steps.create_pr.outputs.pull-request-number
         uses: actions/github-script@v7
