@@ -96,29 +96,15 @@ function getExtension(url) {
 
 async function processSubmission() {
   try {
-    // Create evidence directory if it doesn't exist
-    const evidenceDir = path.join(process.cwd(), 'evidence');
-    if (!fs.existsSync(evidenceDir)) {
-      fs.mkdirSync(evidenceDir, { recursive: true });
-      console.log('Created evidence directory');
-    }
-
     // Determine which image is which
     let profileImageUrl = null;
-    let evidenceImageUrl = null;
 
     if (isFirst && images.length >= 2) {
-      // First submission: first image is profile, second is evidence
       profileImageUrl = images[0];
-      evidenceImageUrl = images[1];
-    } else {
-      // Not first submission or only one image: it's evidence
-      evidenceImageUrl = images[0];
     }
 
     // Generate filenames
     const imageBasename = generateImageFilename(fullName);
-    const sanitizedScore = sanitizeFilename(score);
     let profileImagePath = null;
     
     // Download profile image if first submission
@@ -129,12 +115,6 @@ async function processSubmission() {
       profileImagePath = path.join(imagesDir, profileFilename);
       await downloadImage(profileImageUrl, profileImagePath, imagesDir);
     }
-
-    // Download evidence screenshot
-    const evidenceExt = getExtension(evidenceImageUrl);
-    const evidenceFilename = `score_${sanitizedScore}_${imageBasename}.${evidenceExt}`;
-    const evidencePath = path.join(evidenceDir, evidenceFilename);
-    await downloadImage(evidenceImageUrl, evidencePath, evidenceDir);
 
     // Determine image path for ACHIEVEMENTS_DATA
     let imagePath;

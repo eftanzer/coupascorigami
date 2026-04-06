@@ -33,11 +33,6 @@ jobs:
     
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
       
       - name: Parse issue body
         id: parse
@@ -140,7 +135,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
-              body: `## ❌ Validation Failed\n\nPlease fix the following errors:\n\n${errorList}\n\nOnce fixed, please close this issue and create a new one with the corrected information.`
+              body: `## Validation Failed\n\nPlease fix the following errors:\n\n${errorList}\n\nOnce fixed, please close this issue and create a new one with the corrected information.`
             });
             
             await github.rest.issues.update({
@@ -175,7 +170,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
-              body: `## ℹ️ Score Already Exists\n\nScore **${score}** has already been achieved by someone else! Check the grid on the [Coupa Scorigami page](https://eftanzer.github.io/coupascorigami/) to see who got it first.\n\nTry for a different score next time! 🎯`
+              body: `## Score Already Exists\n\nScore **${score}** has already been achieved by someone else. Check the grid on the [Coupa Scorigami page](https://eftanzer.github.io/coupascorigami/) to see who got it first.`
             });
             
             await github.rest.issues.update({
@@ -192,10 +187,6 @@ jobs:
         if: steps.parse.outputs.hasErrors == 'false' && steps.check_duplicate.outputs.exists == 'false'
         id: process
         run: |
-          # Install dependencies
-          npm install
-          
-          # Run processing script
           node .github/scripts/process_submission.js \
             "${{ steps.parse.outputs.score }}" \
             "${{ steps.parse.outputs.date }}" \
@@ -224,14 +215,11 @@ jobs:
             - **Submitted by**: ${{ steps.parse.outputs.fullName }}
             - **First submission**: ${{ steps.parse.outputs.isFirstScore }}
             
-            This PR was automatically created from issue #${{ github.event.issue.number }}
+            Automatically created from issue #${{ github.event.issue.number }}.
             
             ### Changes
             - Updated `ACHIEVEMENTS_DATA` in script.js with new score entry
             ${{ steps.parse.outputs.isFirstScore == 'true' && '- Added user profile image to images/ directory' || '' }}
-            - Added evidence screenshot to evidence/ directory
-            
-            Please review the submission and merge if everything looks correct! 🎉
           labels: |
             score-submission
             automated-pr
@@ -248,7 +236,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.issue.number,
-              body: `## ✅ Submission Processed Successfully!\n\nYour score submission has been validated and a Pull Request has been created:\n\n🔗 **PR #${prNumber}**: ${prUrl}\n\nThe maintainers will review your submission. Once approved and merged, your score will appear on the Coupa Scorigami board!\n\nThank you for your contribution! 🎉`
+              body: `## Submission Processed\n\nYour score submission has been validated and a Pull Request has been created: **[PR #${prNumber}](${prUrl})**\n\nOnce reviewed and merged, your score will appear on the Coupa Scorigami board. Thank you for your contribution!`
             });
             
             await github.rest.issues.update({
