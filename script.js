@@ -21,6 +21,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/marcelo_sousa.jpeg"
         },
         {
+            "score": 23,
+            "date": "2026-04-27",
+            "username": "Taylor Brown",
+            "image": "images/taylor_brown.jpeg"
+        },
+        {
             "score": 34,
             "date": "2025-11-19",
             "username": "Jill Wilkins",
