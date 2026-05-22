@@ -135,6 +135,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/david_alessi.png"
         },
         {
+            "score": 70,
+            "date": "2026-01-20",
+            "username": "Taylor Brown",
+            "image": "images/taylor_brown.jpeg"
+        },
+        {
             "score": 72,
             "date": "2025-11-12",
             "username": "James Bowes",
