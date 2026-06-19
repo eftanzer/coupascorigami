@@ -87,6 +87,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 50,
+            "date": "2026-05-15",
+            "username": "Sharon Branchen",
+            "image": "images/sharon_branchen.jpeg"
+        },
+        {
             "score": 52,
             "date": "2026-04-27",
             "username": "Taylor Brown",
@@ -97,6 +103,18 @@ const ACHIEVEMENTS_DATA = {
             "date": "2025-12-19",
             "username": "James Bowes",
             "image": "images/james_bowes.jpeg"
+        },
+        {
+            "score": 55,
+            "date": "2025-06-11",
+            "username": "Jake Vogt",
+            "image": "images/jake_vogt.jpeg"
+        },
+        {
+            "score": 57,
+            "date": "2025-10-18",
+            "username": "Jake Vogt",
+            "image": "images/jake_vogt.jpeg"
         },
         {
             "score": 58,
@@ -231,6 +249,18 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 86,
+            "date": "2026-01-08",
+            "username": "Jake Vogt",
+            "image": "images/jake_vogt.jpeg"
+        },
+        {
+            "score": 87,
+            "date": "2026-06-18",
+            "username": "Jake Vogt",
+            "image": "images/jake_vogt.jpeg"
+        },
+        {
             "score": 88,
             "date": "2025-08-08",
             "username": "Ezra Tanzer",
@@ -271,6 +301,12 @@ const ACHIEVEMENTS_DATA = {
             "date": "2025-02-07",
             "username": "Ezra Tanzer",
             "image": "images/ezra_tanzer.jpeg"
+        },
+        {
+            "score": 100,
+            "date": "2026-10-17",
+            "username": "Andrew Gordon",
+            "image": "images/andrew_gordon.jpeg"
         }
     ]
 };
