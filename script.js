@@ -304,7 +304,7 @@ const ACHIEVEMENTS_DATA = {
         },
         {
             "score": 100,
-            "date": "2026-10-17",
+            "date": "2025-10-17",
             "username": "Andrew Gordon",
             "image": "images/andrew_gordon.jpeg"
         }
