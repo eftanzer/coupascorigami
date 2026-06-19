@@ -249,6 +249,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 86,
+            "date": "2025-11-14",
+            "username": "Stefan Sonnier",
+            "image": "images/stefan_sonnier.jpeg"
+        },
+        {
             "score": 87,
             "date": "2026-06-18",
             "username": "Jake Vogt",
