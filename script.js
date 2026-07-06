@@ -27,6 +27,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/taylor_brown.jpeg"
         },
         {
+            "score": 26,
+            "date": "2026-07-06",
+            "username": "Ranko Cupovic",
+            "image": "images/ranko_cupovic.jpeg"
+        },
+        {
             "score": 34,
             "date": "2025-11-19",
             "username": "Jill Wilkins",
