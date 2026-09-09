@@ -93,6 +93,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 49,
+            "date": "2026-09-09",
+            "username": "Andrew Oates",
+            "image": "images/andrew_oates.jpeg"
+        },
+        {
             "score": 50,
             "date": "2026-05-15",
             "username": "Sharon Branchen",
