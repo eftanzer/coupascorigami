@@ -117,6 +117,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/taylor_brown.jpeg"
         },
         {
+            "score": 52,
+            "date": "2026-08-13",
+            "username": "Ezra Tanzer",
+            "image": "images/ezra_tanzer.jpeg"
+        },
+        {
             "score": 53,
             "date": "2026-07-24",
             "username": "Steve Winton",
@@ -315,6 +321,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 97,
+            "date": "2026-09-23",
+            "username": "Ezra Tanzer",
+            "image": "images/ezra_tanzer.jpeg"
+        },
+        {
             "score": 98,
             "date": "2025-06-11",
             "username": "James Bowes",
@@ -334,6 +346,9 @@ const ACHIEVEMENTS_DATA = {
         }
     ]
 };
+
+// Max additional achievers listed in a tooltip; the rest collapse into "+N more"
+const MAX_EXTRA_TOOLTIP_ROWS = 5;
 
 class CoupaScorigami {
     constructor() {
@@ -356,30 +371,24 @@ class CoupaScorigami {
     }
 
     processDuplicateScores(achievements) {
-        // Create a map to track the earliest achievement for each score
+        // Group by score. The earliest achievement is the primary (shown on the
+        // grid and counted in the totals); later ones are kept as `additional`
+        // and only appear in the hover tooltip.
         const scoreMap = new Map();
-        
+
         achievements.forEach(achievement => {
-            const score = achievement.score;
-            const existingAchievement = scoreMap.get(score);
-            
-            if (!existingAchievement) {
-                // First time seeing this score
-                scoreMap.set(score, achievement);
-            } else {
-                // Compare dates to keep the earliest one (using local date parsing)
-                const currentDate = this.parseLocalDate(achievement.date);
-                const existingDate = this.parseLocalDate(existingAchievement.date);
-                
-                if (currentDate < existingDate) {
-                    // Current achievement is earlier, replace the existing one
-                    scoreMap.set(score, achievement);
-                }
+            if (!scoreMap.has(achievement.score)) {
+                scoreMap.set(achievement.score, []);
             }
+            scoreMap.get(achievement.score).push(achievement);
         });
-        
-        // Convert map back to array
-        return Array.from(scoreMap.values());
+
+        return Array.from(scoreMap.values()).map(group => {
+            const sorted = [...group].sort((a, b) =>
+                this.parseLocalDate(a.date) - this.parseLocalDate(b.date));
+            const [primary, ...additional] = sorted;
+            return { ...primary, additional };
+        });
     }
 
     createGrid() {
@@ -500,6 +509,41 @@ class CoupaScorigami {
         tooltipName.textContent = achievement.username;
         tooltipDate.textContent = this.formatDate(achievement.date);
         tooltipScore.textContent = `Score: ${achievement.score}`;
+
+        // Additional achievers of the same score, shown below the original
+        const extra = document.getElementById('tooltip-extra');
+        extra.innerHTML = '';
+        const additional = achievement.additional || [];
+        additional.slice(0, MAX_EXTRA_TOOLTIP_ROWS).forEach(other => {
+            const row = document.createElement('div');
+            row.className = 'tooltip-extra-row';
+
+            const img = document.createElement('img');
+            img.className = 'tooltip-extra-image';
+            img.src = other.image || 'images/default-avatar.svg';
+            img.alt = `${other.username}'s photo`;
+            img.onerror = () => { img.src = 'images/default-avatar.svg'; };
+
+            const info = document.createElement('div');
+            const name = document.createElement('div');
+            name.className = 'tooltip-extra-name';
+            name.textContent = other.username;
+            const date = document.createElement('div');
+            date.className = 'tooltip-extra-date';
+            date.textContent = this.formatDate(other.date);
+            info.append(name, date);
+
+            row.append(img, info);
+            extra.appendChild(row);
+        });
+        const hidden = additional.length - MAX_EXTRA_TOOLTIP_ROWS;
+        if (hidden > 0) {
+            const more = document.createElement('div');
+            more.className = 'tooltip-extra-more';
+            more.textContent = `+${hidden} more`;
+            extra.appendChild(more);
+        }
+        extra.style.display = extra.children.length ? 'block' : 'none';
 
         // Position and show tooltip
         this.positionTooltip(event);
@@ -773,6 +817,7 @@ class CoupaScorigami {
         const tooltipScore = document.getElementById('tooltip-score');
 
         // Hide image and other fields, only show date
+        document.getElementById('tooltip-extra').style.display = 'none';
         tooltipImage.style.display = 'none';
         tooltipName.style.display = 'none';
         tooltipScore.style.display = 'none';

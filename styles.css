@@ -325,6 +325,47 @@ header p {
     font-size: 0.9rem;
 }
 
+.tooltip-extra {
+    display: none;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+.tooltip-extra-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.tooltip-extra-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #27ae60;
+}
+
+.tooltip-extra-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #2c3e50;
+}
+
+.tooltip-extra-date {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.tooltip-extra-more {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #27ae60;
+    text-align: center;
+}
+
 /* Video Modal Styles */
 .video-modal {
     position: fixed;
