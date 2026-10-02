@@ -57,6 +57,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ryan_mcmorrow.png"
         },
         {
+            "score": 42,
+            "date": "2026-08-11",
+            "username": "Andrew Oates",
+            "image": "images/andrew_oates.jpeg"
+        },
+        {
             "score": 43,
             "date": "2025-10-21",
             "username": "James Bowes",
@@ -93,6 +99,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ezra_tanzer.jpeg"
         },
         {
+            "score": 49,
+            "date": "2026-09-09",
+            "username": "Andrew Oates",
+            "image": "images/andrew_oates.jpeg"
+        },
+        {
             "score": 50,
             "date": "2026-05-15",
             "username": "Sharon Branchen",
@@ -109,6 +121,12 @@ const ACHIEVEMENTS_DATA = {
             "date": "2026-08-13",
             "username": "Ezra Tanzer",
             "image": "images/ezra_tanzer.jpeg"
+        },
+        {
+            "score": 53,
+            "date": "2026-07-24",
+            "username": "Steve Winton",
+            "image": "images/steve_winton.jpeg"
         },
         {
             "score": 54,
