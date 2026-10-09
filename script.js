@@ -69,6 +69,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/ryan_mcmorrow.png"
         },
         {
+            "score": 41,
+            "date": "2026-09-28",
+            "username": "Jill Wilkins",
+            "image": "images/jill_wilkins.jpeg"
+        },
+        {
             "score": 42,
             "date": "2026-08-11",
             "username": "Andrew Oates",
@@ -313,6 +319,12 @@ const ACHIEVEMENTS_DATA = {
             "date": "2026-01-12",
             "username": "Alison Gilles",
             "image": "images/alison_gilles.jpeg"
+        },
+        {
+            "score": 94,
+            "date": "2026-10-01",
+            "username": "Jill Wilkins",
+            "image": "images/jill_wilkins.jpeg"
         },
         {
             "score": 95,
