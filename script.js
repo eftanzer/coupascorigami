@@ -3,6 +3,12 @@
 const ACHIEVEMENTS_DATA = {
     "achievements": [
         {
+            "score": 12,
+            "date": "2026-09-04",
+            "username": "Carey Stanton",
+            "image": "images/carey_stanton.jpeg"
+        },
+        {
             "score": 13,
             "date": "2026-05-12",
             "username": "Annie Tedesco",
@@ -25,6 +31,12 @@ const ACHIEVEMENTS_DATA = {
             "date": "2026-04-27",
             "username": "Taylor Brown",
             "image": "images/taylor_brown.jpeg"
+        },
+        {
+            "score": 25,
+            "date": "2024-12-08",
+            "username": "Carey Stanton",
+            "image": "images/carey_stanton.jpeg"
         },
         {
             "score": 26,
