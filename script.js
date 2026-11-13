@@ -3,6 +3,12 @@
 const ACHIEVEMENTS_DATA = {
     "achievements": [
         {
+            "score": 4,
+            "date": "2026-10-30",
+            "username": "Spencer Koopmans",
+            "image": "images/spencer_koopmans.jpeg"
+        },
+        {
             "score": 12,
             "date": "2026-09-04",
             "username": "Carey Stanton",
