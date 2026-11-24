@@ -12,7 +12,7 @@ const ACHIEVEMENTS_DATA = {
             "score": 7,
             "date": "2026-11-24",
             "username": "Ryan Searle",
-            "image": "images/ryan_searle.jpeg"
+            "image": "images/ryan_searle.png"
         },
         {
             "score": 12,
