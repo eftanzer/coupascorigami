@@ -141,6 +141,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/sharon_branchen.jpeg"
         },
         {
+            "score": 51,
+            "date": "2026-09-29",
+            "username": "Spencer Koopmans",
+            "image": "images/spencer_koopmans.jpeg"
+        },
+        {
             "score": 52,
             "date": "2026-04-27",
             "username": "Taylor Brown",
