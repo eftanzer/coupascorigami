@@ -9,6 +9,12 @@ const ACHIEVEMENTS_DATA = {
             "image": "images/spencer_koopmans.jpeg"
         },
         {
+            "score": 7,
+            "date": "2026-11-24",
+            "username": "Ryan Searle",
+            "image": "images/ryan_searle.png"
+        },
+        {
             "score": 12,
             "date": "2026-09-04",
             "username": "Carey Stanton",
